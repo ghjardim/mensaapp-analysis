@@ -15,6 +15,26 @@ covert or out-of-bounds collection**. Its privacy issues are mostly default sett
 easily fixed mistake: **the app sends users' email addresses to Google Analytics**, together with their
 membership status.
 
+## Is it spyware?
+
+**No evidence of spyware.** Static analysis cannot prove a negative, but none of the usual signs
+are in the code: no access beyond what the app needs, no device fingerprinting, no hidden
+destinations, no ad/tracking/crash/session-recording SDKs, and almost no on-device storage (see
+[What it does NOT do](#what-it-does-not-do)).
+
+**There is questionable collection.** Most of it comes from defaults, with one real problem:
+
+1. **Email to Google Analytics (the real problem).** 4 login events send the user's email, with
+   membership status and user ID. This goes against Google's terms and is hard to justify under LGPD.
+   It is clear in the code but not yet confirmed on the wire.
+2. **Clickstream.** ~490 screen/tap events with the user ID, no consent or opt-out (FlutterFlow default).
+3. **Advertising ID** collected in an app with no ads (Firebase default, not turned off).
+4. **Minor:** fonts fetched from Google at runtime. Typed addresses go to Google Places.
+
+**Unknown:** whether Mensa's server properly protects the sensitive data it receives (CPF, address
+with coordinates, guardians' CPF for minor members). It cannot be judged from the app and was not
+tested. Three code paths also await manual review ([Open items](#open-items-manual-review)).
+
 ## Privacy findings
 
 | # | Finding | Severity | Report |
