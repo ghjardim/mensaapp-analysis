@@ -1,0 +1,48 @@
+package p346t3;
+
+import android.text.TextUtils;
+import android.util.Log;
+import com.google.android.gms.internal.p395firebaseauthapi.zzabq;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import p219e3.C4176f;
+import p354u3.AbstractC6631T;
+
+/* renamed from: t3.G0 */
+/* loaded from: classes.dex */
+public final class C6471G0 extends AbstractC6631T {
+
+    /* renamed from: a */
+    public final /* synthetic */ String f23372a;
+
+    /* renamed from: b */
+    public final /* synthetic */ C6502e f23373b;
+
+    /* renamed from: c */
+    public final /* synthetic */ FirebaseAuth f23374c;
+
+    public C6471G0(FirebaseAuth firebaseAuth, String str, C6502e c6502e) {
+        this.f23372a = str;
+        this.f23373b = c6502e;
+        this.f23374c = firebaseAuth;
+    }
+
+    @Override // p354u3.AbstractC6631T
+    /* renamed from: c */
+    public final Task mo15413c(String str) {
+        zzabq zzabqVar;
+        C4176f c4176f;
+        String str2;
+        if (TextUtils.isEmpty(str)) {
+            Log.i("FirebaseAuth", "Email link sign in for " + this.f23372a + " with empty reCAPTCHA token");
+        } else {
+            Log.i("FirebaseAuth", "Got reCAPTCHA token for email link sign in for " + this.f23372a);
+        }
+        zzabqVar = this.f23374c.f12794e;
+        c4176f = this.f23374c.f12790a;
+        String str3 = this.f23372a;
+        C6502e c6502e = this.f23373b;
+        str2 = this.f23374c.f12800k;
+        return zzabqVar.zzb(c4176f, str3, c6502e, str2, str);
+    }
+}

@@ -1,0 +1,7 @@
+# Reference repo (akitaonrails/tiktok_analysis), cloned locally for the methodology guide
+tiktok_analysis/
+reference/
+
+# Local tooling and scratch output (not versioned)
+tools/
+_work/

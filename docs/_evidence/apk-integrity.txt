@@ -1,0 +1,15 @@
+# com.mensabrasil.app v7.7.0 (versionCode 141) — pulled via adb from moto g14 on 2026-11-08
+2ce5f1f2b70856f03175fcf6b8c04efebb451ab0487f654cfa4831b1f2e6a21d  apk_mensabrasil/base.apk
+63e014d8b2167363ee5d428baa2abfa2b167d832fbfcd8b33a91e7f06e19dfda  apk_mensabrasil/split_config.arm64_v8a.apk
+9b0523ab96976de01b4341364ff83ce9e6f3ca7ca67c5b76e6a1d733f67ba4b5  apk_mensabrasil/split_config.es.apk
+856a92cdc4f66e7404614490fdd20d2eb8a174f28688f0a4789115058eeaf22f  apk_mensabrasil/split_config.pt.apk
+367111d4fe94130100f80ff792cba350dacf576f699a2fa8ffadfad5c67b8e23  apk_mensabrasil/split_config.xxhdpi.apk
+
+Signer #1 certificate DN: CN=Android, OU=Android, O=Google Inc., L=Mountain View, ST=California, C=US
+Signer #1 certificate SHA-256 digest: cf97b221d103654bb7754b2a3bae411708511b0406c328392db19fb82c16406e
+Signer #1 certificate SHA-1 digest: a9632f89942b6cbb30dea105885320af4f5e9026
+Signer #1 certificate MD5 digest: 51d637207e3fdb0ffed2cd49fafc0e92
+Source Stamp Signer certificate DN: CN=Android, OU=Android, O=Google Inc., L=Mountain View, ST=California, C=US
+Source Stamp Signer certificate SHA-256 digest: 3257d599a49d2c961a471ca9843f59d341a405884583fc087df4237b733bbd6d
+Source Stamp Signer certificate SHA-1 digest: b1af3a0bf998aeede1a8716a539e5a59da1d86d6
+Source Stamp Signer certificate MD5 digest: 577b8a9fbc7e308321aec6411169d2fb

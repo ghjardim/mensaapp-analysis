@@ -1,0 +1,142 @@
+package org.apache.tika.mime;
+
+import com.google.android.gms.common.api.C3643a;
+import java.io.Serializable;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
+/* loaded from: classes2.dex */
+class Patterns implements Serializable {
+    private static final long serialVersionUID = -5778015347278111140L;
+    private final MediaTypeRegistry registry;
+    private final Map<String, MimeType> names = new HashMap();
+    private final Map<String, MimeType> extensions = new HashMap();
+    private final SortedMap<String, MimeType> globs = new TreeMap(new LengthComparator());
+    private int minExtensionLength = C3643a.e.API_PRIORITY_OTHER;
+    private int maxExtensionLength = 0;
+
+    public static final class LengthComparator implements Comparator<String>, Serializable {
+        private static final long serialVersionUID = 8468289702915532359L;
+
+        private LengthComparator() {
+        }
+
+        @Override // java.util.Comparator
+        public int compare(String str, String str2) {
+            int length = str2.length() - str.length();
+            return length == 0 ? str.compareTo(str2) : length;
+        }
+    }
+
+    public Patterns(MediaTypeRegistry mediaTypeRegistry) {
+        this.registry = mediaTypeRegistry;
+    }
+
+    private void addExtension(String str, MimeType mimeType) {
+        MimeType mimeType2 = this.extensions.get(str);
+        if (mimeType2 == null || this.registry.isSpecializationOf(mimeType2.getType(), mimeType.getType())) {
+            this.extensions.put(str, mimeType);
+            int length = str.length();
+            this.minExtensionLength = Math.min(this.minExtensionLength, length);
+            this.maxExtensionLength = Math.max(this.maxExtensionLength, length);
+            return;
+        }
+        if (mimeType2 == mimeType || this.registry.isSpecializationOf(mimeType.getType(), mimeType2.getType())) {
+            return;
+        }
+        throw new MimeTypeException("Conflicting extension pattern: " + str);
+    }
+
+    private void addGlob(String str, MimeType mimeType) {
+        MimeType mimeType2 = this.globs.get(str);
+        if (mimeType2 == null || this.registry.isSpecializationOf(mimeType2.getType(), mimeType.getType())) {
+            this.globs.put(str, mimeType);
+        } else {
+            if (mimeType2 == mimeType || this.registry.isSpecializationOf(mimeType.getType(), mimeType2.getType())) {
+                return;
+            }
+            throw new MimeTypeException("Conflicting glob pattern: " + str);
+        }
+    }
+
+    private void addName(String str, MimeType mimeType) {
+        MimeType mimeType2 = this.names.get(str);
+        if (mimeType2 == null || this.registry.isSpecializationOf(mimeType2.getType(), mimeType.getType())) {
+            this.names.put(str, mimeType);
+        } else {
+            if (mimeType2 == mimeType || this.registry.isSpecializationOf(mimeType.getType(), mimeType2.getType())) {
+                return;
+            }
+            throw new MimeTypeException("Conflicting name pattern: " + str);
+        }
+    }
+
+    private String compile(String str) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\\A");
+        for (int i7 = 0; i7 < str.length(); i7++) {
+            char charAt = str.charAt(i7);
+            if (charAt == '?') {
+                sb.append('.');
+            } else if (charAt == '*') {
+                sb.append(".*");
+            } else if ("\\[]^.-$+(){}|".indexOf(charAt) != -1) {
+                sb.append('\\');
+                sb.append(charAt);
+            } else {
+                sb.append(charAt);
+            }
+        }
+        sb.append("\\z");
+        return sb.toString();
+    }
+
+    public void add(String str, MimeType mimeType) {
+        add(str, false, mimeType);
+    }
+
+    public MimeType matches(String str) {
+        if (str == null) {
+            throw new IllegalArgumentException("Name is missing");
+        }
+        if (this.names.containsKey(str)) {
+            return this.names.get(str);
+        }
+        for (int min = Math.min(this.maxExtensionLength, str.length()); min >= this.minExtensionLength; min--) {
+            String substring = str.substring(str.length() - min);
+            if (this.extensions.containsKey(substring)) {
+                return this.extensions.get(substring);
+            }
+        }
+        for (Map.Entry<String, MimeType> entry : this.globs.entrySet()) {
+            if (str.matches(entry.getKey())) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
+
+    public void add(String str, boolean z6, MimeType mimeType) {
+        if (str == null || mimeType == null) {
+            throw new IllegalArgumentException("Pattern and/or mime type is missing");
+        }
+        if (z6) {
+            addGlob(str, mimeType);
+            return;
+        }
+        if (str.indexOf(42) == -1 && str.indexOf(63) == -1 && str.indexOf(91) == -1) {
+            addName(str, mimeType);
+            return;
+        }
+        if (!str.startsWith("*") || str.indexOf(42, 1) != -1 || str.indexOf(63) != -1 || str.indexOf(91) != -1) {
+            addGlob(compile(str), mimeType);
+            return;
+        }
+        String substring = str.substring(1);
+        addExtension(substring, mimeType);
+        mimeType.addExtension(substring);
+    }
+}

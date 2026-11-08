@@ -1,0 +1,18 @@
+package com.google.android.gms.internal.measurement;
+
+import android.content.ContentResolver;
+import android.net.Uri;
+
+/* loaded from: classes.dex */
+public final class zzjb {
+    private static final zzjd zza;
+
+    static {
+        Uri uri = zzjc.zza;
+        zza = zzje.zza();
+    }
+
+    public static String zza(ContentResolver contentResolver, String str, String str2) {
+        return zza.zza(contentResolver, str, null);
+    }
+}
