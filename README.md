@@ -1,7 +1,8 @@
 # Mensa Brasil (Android) — Privacy and data-flow analysis
 
 Static analysis of the **Mensa Brasil** app, following the methodology of
-<https://github.com/akitaonrails/tiktok_analysis> (guide: `docs/11-diy-reproduce-guide.md` in that repo).
+<https://github.com/akitaonrails/tiktok_analysis> (guide: `docs/11-diy-reproduce-guide.md` in that repo), pinned at commit
+`066e0cdcc56b127ed557e02b63853a4a140061e0` (2026-11-04). Local clone in `tiktok_analysis/` (git-ignored).
 
 | | |
 |---|---|
@@ -16,10 +17,17 @@ Done:
 - [x] Step 1 — APKs obtained via adb (`apk_mensabrasil/`: base + 4 splits)
 - [x] Step 2 — jadx 1.5.1 (`scripts/00-setup-jadx.sh`)
 - [x] Step 4 — decompiled `base.apk` into `decompiled/` (5,733 classes, 10 with errors; used `--deobf`)
+- [x] [02 — Permissions](docs/02-permissions.md): small set; no location/contacts/mic/phone; Firebase-injected ad-ID/attribution permissions with no opt-out
+- [x] [03 — Manifest components](docs/03-manifest-components.md): no exported providers; exported receivers guarded; `allowBackup` defaults to true; custom-scheme deep link
 
-Pending (in the guide's order): manifest/permissions/components, host and endpoint map, strings from
-`.dex`/`.so`, privacy sink search, third-party SDKs, native libs (`split_config.arm64_v8a`),
-assessment, mitigation, LGPD. Reports will go in `docs/NN-*.md`, evidence in `docs/_evidence/`.
+**Key methodology difference from the reference:** this is a **Flutter** app. The Java tree is only
+the Android shell (Firebase, plugins). All first-party logic is Dart AOT in
+`lib/arm64-v8a/libapp.so` (Dart snapshot `830f4f59e7969c70b595182826435c19`). jadx can't read it.
+It needs a Dart snapshot tool (e.g. blutter) or string/xref analysis of `libapp.so`.
+
+Pending: 01 overview, 04 host/endpoint map (from `libapp.so`), 05 data collection (Analytics events,
+`device_info_plus`, API payloads), 06 third-party SDKs, deep-link route handling, assessment,
+mitigation, LGPD. Reports go in `docs/NN-*.md`, evidence in `docs/_evidence/`.
 
 ## Initial observations (not yet verified)
 - Dependencies seen in `decompiled/resources/`: Firebase (Auth, Analytics, Messaging), Play Integrity,
