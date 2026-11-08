@@ -19,14 +19,19 @@ Done:
 - [x] Step 4 — decompiled `base.apk` into `decompiled/` (5,733 classes, 10 with errors; used `--deobf`)
 - [x] [02 — Permissions](docs/02-permissions.md): small set; no location/contacts/mic/phone; Firebase-injected ad-ID/attribution permissions with no opt-out
 - [x] [03 — Manifest components](docs/03-manifest-components.md): no exported providers; exported receivers guarded; `allowBackup` defaults to true; custom-scheme deep link
+- [x] blutter decode of `libapp.so` (Dart 3.8.1; `tools/blutter` @ `4a60ac6`, output in git-ignored `_work/blutter/`)
+- [x] [04 — Network map](docs/04-network-endpoints.md): one first-party API (`api.mensan.org.br`, 44 endpoints, Firebase ID token auth); no pinning; CPF/address+latlong/legal-rep data flows
+
+Working notes (incl. steps stopped by the AI assistant's safety classifier): [`docs/_notes/investigation-log.md`](docs/_notes/investigation-log.md).
+**This analysis is static only. No request is ever sent to Mensa's API or Firebase project.**
 
 **Key methodology difference from the reference:** this is a **Flutter** app. The Java tree is only
 the Android shell (Firebase, plugins). All first-party logic is Dart AOT in
 `lib/arm64-v8a/libapp.so` (Dart snapshot `830f4f59e7969c70b595182826435c19`). jadx can't read it.
 It needs a Dart snapshot tool (e.g. blutter) or string/xref analysis of `libapp.so`.
 
-Pending: 01 overview, 04 host/endpoint map (from `libapp.so`), 05 data collection (Analytics events,
-`device_info_plus`, API payloads), 06 third-party SDKs, deep-link route handling, assessment,
+Pending: 01 overview, 05 data collection (Firestore collections, Places autocomplete, Analytics events,
+`device_info_plus`), 06 third-party SDKs, deep-link route handling, assessment,
 mitigation, LGPD. Reports go in `docs/NN-*.md`, evidence in `docs/_evidence/`.
 
 ## Initial observations (not yet verified)
