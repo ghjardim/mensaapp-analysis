@@ -73,4 +73,4 @@ infrastructure, which needs the operator's authorization.
 Compared with the reference TikTok analysis (surveillance-grade collection, dozens of SDKs,
 encrypted native telemetry), this app is **small, legible and mostly default-configured**. The
 fixes are cheap: remove the email parameter from the four Analytics events, disable ad-ID
-collection, add backup rules, bundle the fonts and drop unused plugins. See [08](08-mitigation-options.md) and, for the legal reading, [17](17-brazilian-law-compliance.md).
+collection, add backup rules, bundle the fonts and drop unused plugins. See [08](08-mitigation-options.md) and, for the legal reading, [09](09-brazilian-law-compliance.md).

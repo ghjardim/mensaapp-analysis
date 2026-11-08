@@ -27,7 +27,7 @@ Done:
 - [x] Route inventory ([`_evidence/routes.md`](docs/_evidence/routes.md)): 40 routes, 38 require auth; deep-link parameter handling left for manual review
 - [x] [07 — Assessment](docs/07-assessment.md): no covert/out-of-bounds collection; ranked findings (top: email sent to Google Analytics); server side untested by design
 - [x] [08 — Mitigation](docs/08-mitigation-options.md): ranked developer fixes (mostly config one-liners) + user-side steps (ad-ID reset, DNS-block Analytics)
-- [x] [17 — LGPD / ECA Digital](docs/17-brazilian-law-compliance.md): main tension = email + membership status to Google Analytics (Art. 6 I/III, Art. 10); minors' data (Art. 14); no in-app account deletion
+- [x] [09 — LGPD / ECA Digital](docs/09-brazilian-law-compliance.md): main tension = email + membership status to Google Analytics (Art. 6 I/III, Art. 10); minors' data (Art. 14); no in-app account deletion
 
 Working notes (incl. steps stopped by the AI assistant's safety classifier): [`docs/_notes/investigation-log.md`](docs/_notes/investigation-log.md).
 **This analysis is static only. No request is ever sent to Mensa's API or Firebase project.**

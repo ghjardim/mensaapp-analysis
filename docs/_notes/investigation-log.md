@@ -151,8 +151,8 @@ Steps stopped by an AI safety classifier are recorded here instead of being retr
   no Firebase Remote Config in the Dart snapshot (no package dir, no references).
 - README "Reproduce" now includes the blutter + extractor steps.
 
-## 2026-11-08 — Mitigation (08) and LGPD (17)
-- Written as syntheses of 02-07. One new check for 17: no account-deletion code in the Dart
+## 2026-11-08 — Mitigation (08) and LGPD (09, originally numbered 17)
+- Written as syntheses of 02-07. One new check for 09: no account-deletion code in the Dart
   snapshot (no `User.delete` / `deleteUser` references; FlutterFlow's helper was tree-shaken). Combined
   with the 40 routes / 44 endpoints, this means there is **no in-app delete-account flow** in 7.7.0.
 - Firebase Analytics upload hostname (`app-measurement.com`) in 08 comes from Google's SDK

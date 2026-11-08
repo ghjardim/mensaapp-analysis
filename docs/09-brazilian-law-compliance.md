@@ -1,7 +1,7 @@
-# 17 — Brazilian Law: LGPD (and ECA Digital) — Technical Reading
+# 09 — Brazilian Law: LGPD (and ECA Digital) — Technical Reading
 
 How the findings in 02-07 map onto Brazil's **LGPD** (Lei 13.709/2018), plus a note on the
-**ECA Digital / "Lei Felca"** (Lei 15.211/2025). (Numbered 17 to match the reference repo.)
+**ECA Digital / "Lei Felca"** (Lei 15.211/2025).
 
 > **Not legal advice, and not a legal verdict.** Whether a practice infringes the law is decided by
 > the **ANPD** and the courts, weighing Mensa Brasil's privacy policy, consent flows, legal bases

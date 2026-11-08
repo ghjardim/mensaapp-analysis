@@ -22,7 +22,7 @@ Analytics uploads come from Google's SDK documentation, not from traffic observe
 | 8 | **Review server-side controls** | Context (07) | Not visible in the app: check API authorization for every endpoint (especially the admin routes shipped to all members), Firestore rules for `users` (which holds certificate and Wallet tokens), and logging/retention. This is the highest-value item that this analysis **could not** check |
 | 9 | **Manual review of items the AI assistant left open** | Blind spots (07) | See [`_notes/investigation-log.md`](_notes/investigation-log.md): HTTP method enum names, the `certificado?MB=` link, and how pages validate route parameters arriving through the `carteirinhasmensa://` deep link |
 
-Items 1, 3, 5 and 6 are each a few lines. Items 1-4 also directly support the LGPD reading in 17.
+Items 1, 3, 5 and 6 are each a few lines. Items 1-4 also directly support the LGPD reading in 09.
 
 ## B. For users (what you can do today)
 
@@ -36,7 +36,7 @@ Items 1, 3, 5 and 6 are each a few lines. Items 1-4 also directly support the LG
 
 **What users cannot change:** what the Mensa API and Firestore store about you (CPF, address,
 legal representative) is the service itself. The rights to access, correct and delete it go through
-Mensa Brasil as the data controller (LGPD Art. 18; see 17).
+Mensa Brasil as the data controller (LGPD Art. 18; see 09).
 
 ## What not to do
 

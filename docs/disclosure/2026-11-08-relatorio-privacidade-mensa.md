@@ -97,4 +97,4 @@ Estes pontos concentram o risco real e dependem só da Mensa. **Não foram testa
 
 ---
 *Análise técnica para fins de segurança e privacidade, sem caráter de aconselhamento jurídico.
-Detalhes completos (em inglês): relatórios 02-08 e 17 do repositório da análise.*
+Detalhes completos (em inglês): relatórios 01-09 do repositório da análise.*
