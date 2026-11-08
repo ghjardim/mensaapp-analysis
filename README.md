@@ -11,7 +11,7 @@ Static analysis of the **Mensa Brasil** app, following the methodology of
 | APK source | `adb pull` from the phone (moto g14), 2026-11-08 |
 | Integrity | `docs/_evidence/apk-integrity.txt` (SHA-256 + certificate) |
 
-## Status: PARTIAL (in progress)
+## Status: COMPLETE (static analysis; items left for manual review in the log)
 
 Done:
 - [x] Step 1 — APKs obtained via adb (`apk_mensabrasil/`: base + 4 splits)
@@ -26,6 +26,8 @@ Done:
 - [x] [06 — Third-party SDKs](docs/06-third-party-sdks.md): Google/Firebase only (no ad, attribution or crash vendors); runtime Google Fonts; Tika via `file_picker`; several plugins linked but unused
 - [x] Route inventory ([`_evidence/routes.md`](docs/_evidence/routes.md)): 40 routes, 38 require auth; deep-link parameter handling left for manual review
 - [x] [07 — Assessment](docs/07-assessment.md): no covert/out-of-bounds collection; ranked findings (top: email sent to Google Analytics); server side untested by design
+- [x] [08 — Mitigation](docs/08-mitigation-options.md): ranked developer fixes (mostly config one-liners) + user-side steps (ad-ID reset, DNS-block Analytics)
+- [x] [17 — LGPD / ECA Digital](docs/17-brazilian-law-compliance.md): main tension = email + membership status to Google Analytics (Art. 6 I/III, Art. 10); minors' data (Art. 14); no in-app account deletion
 
 Working notes (incl. steps stopped by the AI assistant's safety classifier): [`docs/_notes/investigation-log.md`](docs/_notes/investigation-log.md).
 **This analysis is static only. No request is ever sent to Mensa's API or Firebase project.**
@@ -35,7 +37,7 @@ the Android shell (Firebase, plugins). All first-party logic is Dart AOT in
 `lib/arm64-v8a/libapp.so` (Dart snapshot `830f4f59e7969c70b595182826435c19`). jadx can't read it.
 It needs a Dart snapshot tool (e.g. blutter) or string/xref analysis of `libapp.so`.
 
-Pending: 08 mitigation, 17 LGPD mapping. Reports go in `docs/NN-*.md`, evidence in `docs/_evidence/`.
+Reports go in `docs/NN-*.md`, evidence in `docs/_evidence/`.
 
 ## Reproduce
 ```sh
