@@ -105,3 +105,26 @@ Steps stopped by an AI safety classifier are recorded here instead of being retr
   Firestore's offline cache is not configured explicitly, so the SDK default (on) applies. *Inferred*.
 - App Check: `flutter_flow/firebase_app_check_util.dart:18` calls `FirebaseAppCheck.activate()` at
   startup (`main.dart`), with no provider override seen. The provider is the plugin default. *Inferred*.
+
+## 2026-11-08 — Third-party SDKs (06)
+- Dart packages: 100 dirs in `_work/blutter/asm/` (only packages with code that survived
+  tree-shaking appear). `sign_in_with_apple` and `device_info_plus` have **no Dart code** in the
+  snapshot, even though their Android plugins are registered. `firebase_storage` likewise.
+- Android libs: versions from `decompiled/resources/*.properties` (firebase-analytics /
+  play-services-measurement 22.4.0, firebase-auth 23.2.0, play-services-auth 21.0.0, recaptcha
+  18.6.1, integrity 1.3.0, play-services-pay 16.5.0, play-services-ads-identifier 18.0.0,
+  play-services-safetynet 18.0.0) and `META-INF/*.version` (56 androidx, kotlinx-coroutines 1.8.1).
+- Apache Tika (`org/apache/tika`) comes from the `file_picker` plugin for local MIME detection
+  (`decompiled/sources/p315p4/C6139f.java:34-38,545-554`: `new Tika().detect(bytes)`). Local only.
+  Other classes "importing" Tika (e.g. `p327r0/C6242i.java`) are R8 constant-sharing artifacts, not real use.
+  `pipes-fork-server-default-log4j2.xml` in resources is Tika baggage, unused on Android.
+- `google_fonts`: `GoogleFonts.getFont` is called (families `Outfit`, used ~347×, and `Roboto`). No font
+  files for them are bundled, and runtime fetching is not disabled (no `allowRuntimeFetching` reference),
+  so the fonts are downloaded from `https://fonts.gstatic.com/s/a/` on first use (then cached).
+- `google_api_headers` (+ `package_info_plus`) is used only by the place picker. It adds the app
+  package/cert headers to Google Places requests (API-key restriction).
+- `add_to_google_wallet`: used by `custom_code/widgets/google_wallet_button.dart` (membership card
+  pass). Token handling was deliberately not examined in depth (see safeguard notes; credential-adjacent).
+- `cached_network_image`: profile and PDF viewer images. `pdfx`: in-app PDF viewer (member manual).
+  `image_picker`: `flutter_flow/upload_data.dart`. `url_launcher`: `flutter_flow/flutter_flow_util.dart`.
+  `file_picker`: Dart package present but no first-party reference found.
