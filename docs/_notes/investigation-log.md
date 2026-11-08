@@ -145,3 +145,8 @@ Steps stopped by an AI safety classifier are recorded here instead of being retr
   route table itself (`docs/_evidence/routes.md`) was produced and is kept as evidence.
   Left for manual review: whether the app's route parameters, when supplied from outside,
   are validated or trusted by the pages that receive them.
+
+## 2026-11-08 — Overview (01) and assessment (07)
+- 01 and 07 written as syntheses of 02-06. New facts checked for them: 3 dex in `base.apk`;
+  no Firebase Remote Config in the Dart snapshot (no package dir, no references).
+- README "Reproduce" now includes the blutter + extractor steps.
