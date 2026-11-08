@@ -57,3 +57,51 @@ Steps stopped by an AI safety classifier are recorded here instead of being retr
   `pages/perfil/perfil_widget.dart` (~line 9286-9386), to see how the URL is built and opened,
   was **stopped by the AI assistant's safety classifier**. Not retried. Open question for manual
   review: what value fills `MB=` and how the URL is opened (external browser vs. in-app WebView).
+
+## 2026-11-08 — Data collection (05), part 1
+- Firestore: one schema, `backend/schema/users_record.dart` (FlutterFlow `users` collection; the
+  collection-name literal was not found by grep, so the name is *inferred* from FlutterFlow convention).
+  Fields: `uid`, `email`, `display_name`, `photo_url`, `phone_number`, `birthdate`, `created_time`,
+  `updated_at`, `lastActive`, `MB`, `member_status`, `expiration_date`, `profile`, `fcm_token`,
+  `CertificateToken`, `AWalletAuthenticationToken`.
+- Client writes to Firestore found: 3 × `_JsonDocumentReference.update` with
+  `FieldValue.arrayUnion` on `fcm_token` (`pages/carteirinha/carteirinha_widget.dart:5123,6264`,
+  `pages/login/login_widget.dart:1227`). No other client-side writes found by grep.
+- Analytics wrapper `backend/firebase_analytics/analytics.dart` (FlutterFlow template):
+  `logFirebaseEvent` adds param `user` (line 53) = `currentUserUid` or `"unset"` (335-345) to
+  **every** event, then `FirebaseAnalytics.logEvent` (261). `logFirebaseAuthEvent` (355) logs
+  `sign_up`/`login` with `method` (450-464).
+- `scripts/11-extract-analytics-events.py` → `docs/_evidence/analytics-events.md`: all 490
+  `logFirebaseEvent` call sites in app code resolved (491st is inside the wrapper), 260 distinct names. Almost all are FlutterFlow
+  auto-instrumentation (`screen_view` ×39, `<Widget>_<action>` taps).
+- **Finding:** 4 developer-added custom events on the login page put the **user's email** in
+  the event parameters (`pages/login/login_widget.dart`):
+  - `usernotregistered`: param `Param 1` = `currentUserEmail` (543, 549, 569)
+  - `LoginExpiredUser`: param `Email` = `currentUserEmail` (711, 717, 737)
+  - `InactiveMember`: param `Email` = `currentUserEmail` (913, 919, 939)
+  - `NotMensaEmail`: param `Email` = `currentUserEmail` (1328, 1334, 1354)
+  These link an email address to a membership status (expired / inactive / not registered) in Google
+  Analytics. Google Analytics terms prohibit sending PII such as email addresses.
+  Capability is clear from the code. Whether the events fire depends on runtime login outcomes.
+
+## 2026-11-08 — Data collection (05), part 2
+- Analytics configuration: the only `FirebaseAnalytics` methods referenced by first-party code are
+  `instance` and `logEvent`. **No** `setAnalyticsCollectionEnabled`, `setConsent`, `setUserId`,
+  `setUserProperty` or ad-ID opt-out. SDK defaults apply (collection on).
+- `device_info_plus`: **absent from the Dart snapshot** (no package dir, no references in blutter
+  output). The Android plugin is registered (03), but the Dart API was tree-shaken out, so the app code
+  does not call it.
+- Google Places: `flutter_flow/flutter_flow_place_picker.dart` → `PlacesAutocomplete.show` →
+  `GoogleMapsPlaces.getDetailsByPlaceId` (with `GoogleApiHeaders`). Used only by
+  `pages/create_address/create_address_widget.dart`. User-initiated. The typed address goes to Google
+  Places, and `latlong` plus address components (`postal_code`, `country`,
+  `administrative_area_level_1`, `locality`, `sublocality`) come back.
+- FCM: `custom_code/actions/register_f_c_m_token2.dart` → `requestPermission` → `getToken`. The token
+  is appended to Firestore `users.fcm_token` (see part 1). On denial it just prints a message.
+- `firebase_storage`: no references in the Dart snapshot (tree-shaken). Activity media uploads go
+  to `api.mensan.org.br` as multipart (04).
+- Local persistence (`app_state.dart`): only `ff_MB` (membership number, int) and
+  `ff_timecached` in SharedPreferences. sqflite only appears via `flutter_cache_manager` (image cache).
+  Firestore's offline cache is not configured explicitly, so the SDK default (on) applies. *Inferred*.
+- App Check: `flutter_flow/firebase_app_check_util.dart:18` calls `FirebaseAppCheck.activate()` at
+  startup (`main.dart`), with no provider override seen. The provider is the plugin default. *Inferred*.
