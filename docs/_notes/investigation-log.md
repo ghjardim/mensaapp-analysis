@@ -128,3 +128,20 @@ Steps stopped by an AI safety classifier are recorded here instead of being retr
 - `cached_network_image`: profile and PDF viewer images. `pdfx`: in-app PDF viewer (member manual).
   `image_picker`: `flutter_flow/upload_data.dart`. `url_launcher`: `flutter_flow/flutter_flow_util.dart`.
   `file_picker`: Dart package present but no first-party reference found.
+
+## 2026-11-08 — Deep links (route inventory)
+- `scripts/12-extract-routes.py` (static, local blutter output only) → `docs/_evidence/routes.md`:
+  40 `FFRoute`s from `flutter_flow/nav/nav.dart` `createRouter` (line 375), with name, path,
+  `requireAuth` flag, page widget and the parameter names each page builder reads via
+  `FFParameters.getParam`. 38 routes have `requireAuth=true`. `Login` (`loginMensa`) and the
+  root `/` do not.
+- The manifest deep link (`carteirinhasmensa://carteirinhasmensa.com`, 03) is routed into this
+  router (`flutter_deeplinking_enabled=true`).
+
+### ⚠ Safeguard note (3rd)
+- Right after the route table was generated, the assistant's next response (the analysis of the
+  route/parameter table in a deep-link context) was **stopped by the AI assistant's safety
+  classifier**. Not retried, and the deep-link analysis was not continued by the assistant. The
+  route table itself (`docs/_evidence/routes.md`) was produced and is kept as evidence.
+  Left for manual review: whether the app's route parameters, when supplied from outside,
+  are validated or trusted by the pages that receive them.
