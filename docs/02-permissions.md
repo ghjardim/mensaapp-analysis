@@ -1,7 +1,8 @@
 # 02 — Permission Analysis
 
 Source: `decompiled/resources/AndroidManifest.xml` (merged manifest from `base.apk`, v7.7.0 / versionCode 141).
-The app declares **13 `<uses-permission>` entries** plus one app-defined signature permission. That
+The app declares **14 `<uses-permission>` entries**: 13 system/Google permissions plus its own
+app-defined signature permission. That
 is a small set. Each one is grouped and assessed below.
 
 > Context: Mensa Brasil is a **Flutter** app (`flutterEmbedding=2`, AndroidManifest.xml:78-80;

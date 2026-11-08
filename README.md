@@ -1,45 +1,106 @@
-# Mensa Brasil (Android) — Privacy and data-flow analysis
+# Mensa Brasil (Android): Privacy and Data-Flow Analysis
 
-Static analysis of the **Mensa Brasil** app, following the methodology of
-<https://github.com/akitaonrails/tiktok_analysis> (guide: `docs/11-diy-reproduce-guide.md` in that repo), pinned at commit
-`066e0cdcc56b127ed557e02b63853a4a140061e0` (2026-11-04). Local clone in `tiktok_analysis/` (git-ignored).
+Static analysis of the **Mensa Brasil** membership app (`com.mensabrasil.app` 7.7.0), following the
+methodology of [akitaonrails/tiktok_analysis](https://github.com/akitaonrails/tiktok_analysis)
+(@ `066e0cd`, adapted for Flutter).
 
-| | |
+> **Static only.** Every finding comes from the APK's code. **No request was ever sent to Mensa's
+> API or Firebase project**, and server-side controls were not tested. Not legal advice, and not an
+> accusation.
+
+## TL;DR
+
+A conventional **FlutterFlow + Firebase** app with a **Google-only** third-party footprint and **no
+covert or out-of-bounds collection**. Its privacy issues are mostly default settings. One is a clear,
+easily fixed mistake: **the app sends users' email addresses to Google Analytics**, together with their
+membership status.
+
+## Privacy findings
+
+| # | Finding | Severity | Report |
+|---|---|---|---|
+| 1 | **Email address sent to Google Analytics** in 4 login events (`usernotregistered`, `LoginExpiredUser`, `InactiveMember`, `NotMensaEmail`), tied to membership status and the Firebase UID | **Medium** | [05](docs/05-data-collection.md) |
+| 2 | **Full clickstream to Google Analytics**: ~490 auto-generated screen/tap events, each tagged with the user's UID. No consent or opt-out | Low-Medium | [05](docs/05-data-collection.md) |
+| 3 | **Ad-ID and attribution permissions and collection** in an app with no ads (`AD_ID`, AdServices, install referrer). No opt-out | Low | [02](docs/02-permissions.md) |
+| 4 | **Backups not restricted** (`allowBackup` default). The Firestore cache (profile, certificate/Wallet tokens) may be included in device backups | Low | [03](docs/03-manifest-components.md) |
+| 5 | **Google Fonts downloaded at runtime** from `fonts.gstatic.com` (exposes IP to Google) | Low | [06](docs/06-third-party-sdks.md) |
+| 6 | **No in-app account deletion or data export** (LGPD Art. 18 rights go through other channels) | Info | [09](docs/09-brazilian-law-compliance.md) |
+| 7 | Unused plugins linked (`sign_in_with_apple`, `device_info_plus`, `firebase_storage`); no certificate pinning | Info | [06](docs/06-third-party-sdks.md), [04](docs/04-network-endpoints.md) |
+
+### What the app handles about you
+
+| Data | Where it goes |
 |---|---|
-| Package | `com.mensabrasil.app` |
-| Version | 7.7.0 (versionCode 141), minSdk 23 / targetSdk 35 |
-| APK source | `adb pull` from the phone (moto g14), 2026-11-08 |
-| Integrity | `docs/_evidence/apk-integrity.txt` (SHA-256 + certificate) |
+| CPF, birth date, gender, pronouns, profession, Facebook profile | Mensa API (`api.mensan.org.br`) |
+| Home address + coordinates (`latlong`) | Mensa API. The typed address also goes to **Google Places** (autocomplete) |
+| Phones, emails | Mensa API. **Email also goes to Google Analytics** (finding 1) |
+| Legal representative's CPF, name, email, phones (minor members) | Mensa API |
+| Membership number, status, expiry; certificate and Wallet tokens | Firestore `users` document (read by the app) |
+| Every screen and tap, with your Firebase UID | Google Analytics |
+| Push token | Firestore + Firebase Cloud Messaging |
 
-## Status: COMPLETE (static analysis; items left for manual review in the log)
+### What it does NOT do
 
-Done:
-- [x] Step 1 — APKs obtained via adb (`apk_mensabrasil/`: base + 4 splits)
-- [x] Step 2 — jadx 1.5.1 (`scripts/00-setup-jadx.sh`)
-- [x] Step 4 — decompiled `base.apk` into `decompiled/` (5,733 classes, 10 with errors; used `--deobf`)
-- [x] [01 — App overview](docs/01-app-overview.md): FlutterFlow + Firebase app; Dart 3.8.1 AOT; features, architecture, limits
-- [x] [02 — Permissions](docs/02-permissions.md): small set; no location/contacts/mic/phone; Firebase-injected ad-ID/attribution permissions with no opt-out
-- [x] [03 — Manifest components](docs/03-manifest-components.md): no exported providers; exported receivers guarded; `allowBackup` defaults to true; custom-scheme deep link
-- [x] blutter decode of `libapp.so` (Dart 3.8.1; `tools/blutter` @ `4a60ac6`, output in git-ignored `_work/blutter/`)
-- [x] [04 — Network map](docs/04-network-endpoints.md): one first-party API (`api.mensan.org.br`, 44 endpoints, Firebase ID token auth); no pinning; CPF/address+latlong/legal-rep data flows
-- [x] [05 — Data collection](docs/05-data-collection.md): **email sent to Google Analytics** in 4 login events; FlutterFlow clickstream tagged with UID; no device fingerprinting/location/contacts
-- [x] [06 — Third-party SDKs](docs/06-third-party-sdks.md): Google/Firebase only (no ad, attribution or crash vendors); runtime Google Fonts; Tika via `file_picker`; several plugins linked but unused
-- [x] Route inventory ([`_evidence/routes.md`](docs/_evidence/routes.md)): 40 routes, 38 require auth; deep-link parameter handling left for manual review
-- [x] [07 — Assessment](docs/07-assessment.md): no covert/out-of-bounds collection; ranked findings (top: email sent to Google Analytics); server side untested by design
-- [x] [08 — Mitigation](docs/08-mitigation-options.md): ranked developer fixes (mostly config one-liners) + user-side steps (ad-ID reset, DNS-block Analytics)
-- [x] [09 — LGPD / ECA Digital](docs/09-brazilian-law-compliance.md): main tension = email + membership status to Google Analytics (Art. 6 I/III, Art. 10); minors' data (Art. 14); no in-app account deletion
+- **No location, contacts, microphone, SMS, call log, phone state or installed-app list.** Runtime
+  permissions are camera, legacy storage and notifications only.
+- **No device fingerprinting** in app code (`device_info_plus` is not in the Dart snapshot).
+- **No ad networks, attribution vendors, crash reporters, session replay or Meta SDK.** Every SDK is
+  Google/Firebase.
+- **No unattributable hosts.** It talks to Mensa's domains and Google, and links out to WhatsApp and imgur.
+- No exported content providers, HTTPS only, Firebase App Check active, and almost nothing stored
+  locally.
 
-Working notes (incl. steps stopped by the AI assistant's safety classifier): [`docs/_notes/investigation-log.md`](docs/_notes/investigation-log.md).
-**This analysis is static only. No request is ever sent to Mensa's API or Firebase project.**
+### Not assessable statically (server side, not tested)
 
-**Key methodology difference from the reference:** this is a **Flutter** app. The Java tree is only
-the Android shell (Firebase, plugins). All first-party logic is Dart AOT in
-`lib/arm64-v8a/libapp.so` (Dart snapshot `830f4f59e7969c70b595182826435c19`). jadx can't read it.
-It needs a Dart snapshot tool (e.g. blutter) or string/xref analysis of `libapp.so`.
+Who can read the CPF, address and minors' guardian data through the **44 API endpoints** (admin
+endpoints included) and the **Firestore rules** for `users`. This is where most of the real risk sits.
+Testing it requires Mensa's authorization.
 
-Reports go in `docs/NN-*.md`, evidence in `docs/_evidence/`.
+## Reports
+
+| # | Report | Summary |
+|---|---|---|
+| 01 | [App overview](docs/01-app-overview.md) | FlutterFlow + Firebase, Dart 3.8.1 AOT. Features, architecture, limits |
+| 02 | [Permissions](docs/02-permissions.md) | 13 permissions (+1 internal). No location/contacts/mic/phone. SDK-injected ad permissions |
+| 03 | [Manifest components](docs/03-manifest-components.md) | No exported providers. `allowBackup` default. Custom-scheme deep link |
+| 04 | [Network map](docs/04-network-endpoints.md) | One first-party API, 44 endpoints, Firebase ID-token auth, no pinning |
+| 05 | [Data collection](docs/05-data-collection.md) | Email to Analytics. UID-tagged clickstream. Firestore user doc. Places |
+| 06 | [Third-party SDKs](docs/06-third-party-sdks.md) | Google/Firebase only. Runtime Google Fonts. Tika via `file_picker` |
+| 07 | [Assessment](docs/07-assessment.md) | Verdict, ranked findings, negatives, blind spots |
+| 08 | [Mitigation](docs/08-mitigation-options.md) | Developer fixes (mostly one-line config) + user-side steps |
+| 09 | [LGPD / ECA Digital](docs/09-brazilian-law-compliance.md) | Main tension: email to Analytics (Art. 6 I/III, Art. 10). Minors (Art. 14) |
+
+**Evidence** (generated, static): [`api-calls.md`](docs/_evidence/api-calls.md) ·
+[`analytics-events.md`](docs/_evidence/analytics-events.md) · [`routes.md`](docs/_evidence/routes.md) ·
+[`apk-integrity.txt`](docs/_evidence/apk-integrity.txt)
+**Working notes:** [`_notes/investigation-log.md`](docs/_notes/investigation-log.md)
+
+## Open items (manual review)
+
+Three analysis steps were **stopped by the AI assistant's safety classifier** and not retried. They
+are left for a human reviewer (details in the log):
+1. The HTTP-method enum names (methods in 04 are *inferred* from call names).
+2. How the `app-api.mensa.org.br/certificado?MB=` link is built and opened.
+3. How pages validate route parameters arriving through the `carteirinhasmensa://` deep link
+   (route inventory in [`routes.md`](docs/_evidence/routes.md)).
+
+## Disclosure
+
+A private report for Mensa Brasil's DPO (pt-BR) is in
+[`docs/disclosure/`](docs/disclosure/2026-11-08-relatorio-privacidade-mensa.md). **Keep this repo
+private until Mensa has had a chance to fix finding 1.** Note also that `apk_mensabrasil/` holds the
+original APKs (Mensa's copyright). Remove them before any publication and keep only the hashes.
+
+## Method
+
+- **Flutter changes the approach.** The Java tree (jadx) is only the Android shell. All app logic is
+  Dart AOT in `lib/arm64-v8a/libapp.so` (snapshot `830f4f59e7969c70b595182826435c19`), recovered with
+  [blutter](https://github.com/worawit/blutter) @ `4a60ac6`.
+- Rules: cite `file:line`; separate app code from SDKs; "capability present" ≠ "proven behavior";
+  mark anything not read directly from code as *inferred*; never contact the backend.
 
 ## Reproduce
+
 ```sh
 scripts/00-setup-jadx.sh      # downloads jadx into tools/jadx (not versioned)
 scripts/01-pull-apk.sh        # phone connected with USB debugging enabled
@@ -54,6 +115,11 @@ python3 -I scripts/10-extract-api-calls.py _work/blutter/asm/carteirinhas_mensa/
 python3 -I scripts/11-extract-analytics-events.py _work/blutter/asm/carteirinhas_mensa > docs/_evidence/analytics-events.md
 python3 -I scripts/12-extract-routes.py _work/blutter/asm/carteirinhas_mensa/flutter_flow/nav/nav.dart > docs/_evidence/routes.md
 ```
-Analysis rules: cite `file:line`; separate app code from SDKs; "capability present" ≠ "proven behavior".
 
-> Technical research for educational purposes; not legal advice nor an accusation.
+| Path | Contents | In git |
+|---|---|---|
+| `apk_mensabrasil/` | Original APKs (base + 4 splits), pulled 2026-11-08 from a moto g14 | yes (remove before publishing) |
+| `decompiled/` | jadx output of `base.apk` (5,733 classes, `--deobf`) | yes |
+| `docs/` | Reports, evidence, notes, disclosure | yes |
+| `scripts/` | Pull, decompile and extractor scripts | yes |
+| `tools/`, `_work/`, `tiktok_analysis/` | jadx, blutter, venv, blutter output, reference clone | no (git-ignored) |
